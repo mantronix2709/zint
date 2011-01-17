@@ -189,7 +189,7 @@ int code16k(struct zint_symbol *symbol, unsigned char source[], int length)
 	
 	if(input_length > 157) {
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 
 	e_count = 0;
@@ -294,7 +294,7 @@ int code16k(struct zint_symbol *symbol, unsigned char source[], int length)
 	for(i = 0; i < read; i++) {
 		if(set[i] == 'C') {
 			if(source[i] == '[') {
-				if(c_count % 2) {
+				if(c_count & 1) {
 					if((i - c_count) != 0) {
 						set[i - c_count] = 'B';
 					} else {
@@ -306,7 +306,7 @@ int code16k(struct zint_symbol *symbol, unsigned char source[], int length)
 				c_count++;
 			}
 		} else {
-			if(c_count % 2) {
+			if(c_count & 1) {
 				if((i - c_count) != 0) {
 					set[i - c_count] = 'B';
 				} else {
@@ -316,7 +316,7 @@ int code16k(struct zint_symbol *symbol, unsigned char source[], int length)
 			c_count = 0;
 		}
 	}
-	if(c_count % 2) {
+	if(c_count & 1) {
 		if((i - c_count) != 0) {
 			set[i - c_count] = 'B';
 		} else {
@@ -384,7 +384,7 @@ int code16k(struct zint_symbol *symbol, unsigned char source[], int length)
 	
 	if(glyph_count > 77.0) {
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	
 	/* Calculate how tall the symbol will be */
@@ -409,7 +409,7 @@ int code16k(struct zint_symbol *symbol, unsigned char source[], int length)
 		if(m == 2) { m = 5; }
 		if(gs1) {
 			strcpy(symbol->errtxt, "Cannot use both GS1 mode and Reader Initialisation");
-			return ERROR_INVALID_OPTION;
+			return ZERROR_INVALID_OPTION;
 		} else {
 			if((set[0] == 'B') && (set[1] == 'C')) { m = 6; }
 		}

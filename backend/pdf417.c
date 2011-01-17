@@ -174,6 +174,7 @@ void textprocess(int *chainemc, int *mclength, char chaine[], int start, int len
 	
 	codeascii = 0;
 	wnet = 0;
+	block = 0; /* to silence compiler */
 	
 	for(j = 0; j < 1000; j++) {
 		listet[0][j] = 0;
@@ -289,7 +290,7 @@ void textprocess(int *chainemc, int *mclength, char chaine[], int start, int len
 	}
 	
 	/* 663 */
-	if ((wnet % 2) > 0) {
+	if (wnet & 1) {
 		chainet[wnet] = 29;
 		wnet++;
 	}
@@ -315,7 +316,8 @@ void byteprocess(int *chainemc, int *mclength, unsigned char chaine[], int start
 	unsigned int	chunkLen  = 0;
 	uint64_t	mantisa   = 0ULL;
 	uint64_t	total     = 0ULL;
-	
+	block = 0; /* to silence compiler */
+
 	if(debug) printf("\nEntering byte mode at position %d\n", start);
 
 	if(length == 1) {
@@ -373,6 +375,8 @@ void numbprocess(int *chainemc, int *mclength, char chaine[], int start, int len
 {
 	int j, loop, longueur, dummy[100], dumlength, diviseur, nombre;
 	char chainemod[50], chainemult[100], temp;
+
+	block = 0; /* to silence compiler */
 	
 	strcpy(chainemod, "");
 	for(loop = 0; loop <= 50; loop++) {
@@ -511,10 +515,8 @@ int pdf417(struct zint_symbol *symbol, unsigned char chaine[], int length)
 
 	/* 752 - Now take care of the number of CWs per row */
 	if (symbol->option_1 < 0) {
-		/* note that security level 8 is never used automatically */
-		symbol->option_1 = 7;
-		if(mclength <= 1280) { symbol->option_1 = 6; }
-		if(mclength <= 640) { symbol->option_1 = 5; }
+		symbol->option_1 = 6;
+		if(mclength <= 863) { symbol->option_1 = 5; }
 		if(mclength <= 320) { symbol->option_1 = 4; }
 		if(mclength <= 160) { symbol->option_1 = 3; }
 		if(mclength <= 40) { symbol->option_1 = 2; }
@@ -527,8 +529,6 @@ int pdf417(struct zint_symbol *symbol, unsigned char chaine[], int length)
 	longueur = mclength;
 	if(symbol->option_2 > 30) { symbol->option_2 = 30; }
 	if(symbol->option_2 < 1) {
-		/* This is a much more simple formula to Grand Zebu's - 
-		   it does not try to make the symbol square */
 		symbol->option_2 = 0.5 + sqrt((longueur + k) / 3.0);
 	}
 	if(((longueur + k) / symbol->option_2) > 90) {
@@ -536,21 +536,11 @@ int pdf417(struct zint_symbol *symbol, unsigned char chaine[], int length)
 		symbol->option_2 = symbol->option_2 + 1;
 	}
 
-	/* Reduce the correction level if there isn't room */
-	/* while((longueur + k > PDF_MAX) && (symbol->option_1 > 0)) {
-		symbol->option_1 = symbol->option_1 - 1
-		for(loop = 0; loop <= (symbol->option_1 + 1); loop++)
-		{
-			k *= 2;
-		}
-	} */
-	/* this bit of the code would allow Zint to happily encode 2698 code words with
-	only 2 check digits, so I have abandoned it! - Zint now insists on a proportional
-	amount of check data unless overruled by the user */
-	
-	if(longueur + k > symbol->option_3) {
+	if(longueur + k > 928) {
+		/* Enforce maximum codeword limit */
 		return 2;
 	}
+
 	if(((longueur + k) / symbol->option_2) > 90) {
 		return 4;
 	}
@@ -692,12 +682,12 @@ int pdf417enc(struct zint_symbol *symbol, unsigned char source[], int length)
 	if((symbol->option_1 < -1) || (symbol->option_1 > 8)) {
 		strcpy(symbol->errtxt, "Security value out of range");
 		symbol->option_1 = -1;
-		error_number = WARN_INVALID_OPTION;
+		error_number = ZWARN_INVALID_OPTION;
 	}
 	if((symbol->option_2 < 0) || (symbol->option_2 > 30)) {
 		strcpy(symbol->errtxt, "Number of columns out of range");
 		symbol->option_2 = 0;
-		error_number = WARN_INVALID_OPTION;
+		error_number = ZWARN_INVALID_OPTION;
 	}
 
 	/* 349 */
@@ -708,23 +698,23 @@ int pdf417enc(struct zint_symbol *symbol, unsigned char source[], int length)
 		switch(codeerr) {
 			case 1:
 				strcpy(symbol->errtxt, "No such file or file unreadable");
-				error_number = ERROR_INVALID_OPTION;
+				error_number = ZERROR_INVALID_OPTION;
 				break;
 			case 2:
 				strcpy(symbol->errtxt, "Input string too long");
-				error_number = ERROR_TOO_LONG;
+				error_number = ZERROR_TOO_LONG;
 				break;
 			case 3:
 				strcpy(symbol->errtxt, "Number of codewords per row too small");
-				error_number = WARN_INVALID_OPTION;
+				error_number = ZWARN_INVALID_OPTION;
 				break;
 			case 4:
 				strcpy(symbol->errtxt, "Data too long for specified number of columns");
-				error_number = ERROR_TOO_LONG;
+				error_number = ZERROR_TOO_LONG;
 				break;
 			default:
 				strcpy(symbol->errtxt, "Something strange happened");
-				error_number = ERROR_ENCODING_PROBLEM;
+				error_number = ZERROR_ENCODING_PROBLEM;
 				break;
 		}
 	}
@@ -810,12 +800,12 @@ int micro_pdf417(struct zint_symbol *symbol, unsigned char chaine[], int length)
 	
 	if(mclength > 126) {
 		strcpy(symbol->errtxt, "Input data too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	if(symbol->option_2 > 4) {
 		strcpy(symbol->errtxt, "Specified width out of range");
 		symbol->option_2 = 0;
-		codeerr = WARN_INVALID_OPTION;
+		codeerr = ZWARN_INVALID_OPTION;
 	}
 
 	if(debug) {
@@ -834,21 +824,21 @@ int micro_pdf417(struct zint_symbol *symbol, unsigned char chaine[], int length)
 		/* the user specified 1 column but the data doesn't fit - go to automatic */
 		symbol->option_2 = 0;
 		strcpy(symbol->errtxt, "Specified symbol size too small for data");
-		codeerr = WARN_INVALID_OPTION;
+		codeerr = ZWARN_INVALID_OPTION;
 	}
 	
 	if((symbol->option_2 == 2) && (mclength > 37)) {
 		/* the user specified 2 columns but the data doesn't fit - go to automatic */
 		symbol->option_2 = 0;
 		strcpy(symbol->errtxt, "Specified symbol size too small for data");
-		codeerr = WARN_INVALID_OPTION;
+		codeerr = ZWARN_INVALID_OPTION;
 	}
 	
 	if((symbol->option_2 == 3) && (mclength > 82)) {
 		/* the user specified 3 columns but the data doesn't fit - go to automatic */
 		symbol->option_2 = 0;
 		strcpy(symbol->errtxt, "Specified symbol size too small for data");
-		codeerr = WARN_INVALID_OPTION;
+		codeerr = ZWARN_INVALID_OPTION;
 	}
 	
 	if(symbol->option_2 == 1) {

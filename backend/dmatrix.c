@@ -163,20 +163,32 @@ static void ecc200placement(int *array, int NR, int NC)
 }
 
 // calculate and append ecc code, and if necessary interleave
-static void ecc200(unsigned char *binary, int bytes, int datablock, int rsblock)
+static void ecc200(unsigned char *binary, int bytes, int datablock, int rsblock, int skew)
 {
 	int blocks = (bytes + 2) / datablock, b;
+	int n, p;
 	rs_init_gf(0x12d);
 	rs_init_code(rsblock, 1);
 	for (b = 0; b < blocks; b++) {
 		unsigned char buf[256], ecc[256];
-		int n, p = 0;
+		p = 0;
 		for (n = b; n < bytes; n += blocks)
 			buf[p++] = binary[n];
 		rs_encode(p, buf, ecc);
 		p = rsblock - 1;	// comes back reversed
-		for (n = b; n < rsblock * blocks; n += blocks)
-			binary[bytes + n] = ecc[p--];
+		for (n = b; n < rsblock * blocks; n += blocks) {
+			if (skew) {
+				/* Rotate ecc data to make 144x144 size symbols acceptable */
+				/* See http://groups.google.com/group/postscriptbarcode/msg/5ae8fda7757477da */
+				if(b < 8) {
+					binary[bytes + n + 2] = ecc[p--];
+				} else {
+					binary[bytes + n - 8] = ecc[p--];
+				}
+			} else {
+				binary[bytes + n] = ecc[p--];
+			}
+		}
 	}
 	rs_free();
 }
@@ -361,7 +373,7 @@ int dm200encode(struct zint_symbol *symbol, unsigned char source[], unsigned cha
 	if(symbol->output_options & READER_INIT) {
 		if(gs1) {
 			strcpy(symbol->errtxt, "Cannot encode in GS1 mode and Reader Initialisation at the same time");
-			return ERROR_INVALID_OPTION;
+			return ZERROR_INVALID_OPTION;
 		} else {
 			target[tp] = 234; tp++; /* Reader Programming */
 			concat(binary, " ");
@@ -763,8 +775,8 @@ void add_tail(unsigned char target[], int tp, int tail_length, int last_mode)
 
 int data_matrix_200(struct zint_symbol *symbol, unsigned char source[], int length)
 {
-	int inputlen, i;
-	unsigned char binary[2000];
+	int inputlen, i, skew = 0;
+	unsigned char binary[2200];
 	int binlen;
 	int symbolsize, optionsize, calcsize;
 	int taillength, error_number = 0;
@@ -777,7 +789,7 @@ int data_matrix_200(struct zint_symbol *symbol, unsigned char source[], int leng
 	
 	if(binlen == 0) {
 		strcpy(symbol->errtxt, "Data too long to fit in symbol");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	
 	if((symbol->option_2 >= 1) && (symbol->option_2 <= 30)) {
@@ -788,7 +800,7 @@ int data_matrix_200(struct zint_symbol *symbol, unsigned char source[], int leng
 	
 	calcsize = 29;
 	for(i = 29; i > -1; i--) {
-		if(matrixbytes[i] > binlen) {
+		if(matrixbytes[i] >= binlen) {
 			calcsize = i;
 		}
 	}
@@ -811,7 +823,7 @@ int data_matrix_200(struct zint_symbol *symbol, unsigned char source[], int leng
 		symbolsize = calcsize;
 		if(optionsize != -1) {
 			/* flag an error */
-			error_number = WARN_INVALID_OPTION;
+			error_number = ZWARN_INVALID_OPTION;
 			strcpy(symbol->errtxt, "Data does not fit in selected symbol size");
 		}
 	}
@@ -831,7 +843,8 @@ int data_matrix_200(struct zint_symbol *symbol, unsigned char source[], int leng
 	}
 	
 	// ecc code
-	ecc200(binary, bytes, datablock, rsblock);
+	if(symbolsize == 29) { skew = 1; }
+	ecc200(binary, bytes, datablock, rsblock, skew);
 	{			// placement
 		int x, y, NC, NR, *places;
 		NC = W - 2 * (W / FW);
@@ -890,7 +903,7 @@ int dmatrix(struct zint_symbol *symbol, unsigned char source[], int length)
 	} else {
 		/* ECC 000 - 140 */
 		strcpy(symbol->errtxt, "Older Data Matrix standards are no longer supported");
-		error_number = ERROR_INVALID_OPTION;
+		error_number = ZERROR_INVALID_OPTION;
 	}
 
 	return error_number;

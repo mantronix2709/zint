@@ -25,6 +25,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <stdio.h>
+
 struct zint_render_line {
 	float x, y, length, width;
 	struct zint_render_line *next;      /* Pointer to next line */
@@ -38,10 +40,22 @@ struct zint_render_string {
 	struct zint_render_string *next;    /* Pointer to next character */
 };
 
+struct zint_render_ring {
+	float x, y, radius, line_width;
+	struct zint_render_ring *next;      /* Pointer to next ring */
+};
+
+struct zint_render_hexagon {
+	float x, y;
+	struct zint_render_hexagon *next;   /* Pointer to next hexagon */
+};
+
 struct zint_render {
 	float width, height;
-	struct zint_render_line *lines;	 		/* Pointer to first line */
+	struct zint_render_line *lines;	 	/* Pointer to first line */
 	struct zint_render_string *strings;	/* Pointer to first string */
+	struct zint_render_ring *rings;         /* Pointer to first ring */
+	struct zint_render_hexagon *hexagons;   /* Pointer to first hexagon */
 };
 
 struct zint_symbol {
@@ -50,22 +64,28 @@ struct zint_symbol {
 	int whitespace_width;
 	int border_width;
 	int output_options;
-	char fgcolour[10];
-	char bgcolour[10];
-	char outfile[256];
+#define ZINT_COLOUR_SIZE 10
+	char fgcolour[ZINT_COLOUR_SIZE];
+	char bgcolour[ZINT_COLOUR_SIZE];
+	char outfile[FILENAME_MAX];
 	float scale;
 	int option_1;
 	int option_2;
 	int option_3;
 	int show_hrt;
 	int input_mode;
-	unsigned char text[128];
+#define ZINT_TEXT_SIZE  128
+	unsigned char text[ZINT_TEXT_SIZE];
 	int rows;
 	int width;
-	char primary[128];
-	unsigned char encoded_data[178][143];
-	int row_height[178]; /* Largest symbol is 177x177 QR Code */
-	char errtxt[100];
+#define ZINT_PRIMARY_SIZE  128
+	char primary[ZINT_PRIMARY_SIZE];
+#define ZINT_ROWS_MAX  178
+#define ZINT_COLS_MAX  178
+	unsigned char encoded_data[ZINT_ROWS_MAX][ZINT_COLS_MAX];
+	int row_height[ZINT_ROWS_MAX]; /* Largest symbol is 177x177 QR Code */
+#define ZINT_ERR_SIZE   100
+	char errtxt[ZINT_ERR_SIZE];
 	char *bitmap;
 	int bitmap_width;
 	int bitmap_height;
@@ -100,10 +120,10 @@ struct zint_symbol {
 #define BARCODE_UPCE		37
 #define BARCODE_POSTNET		40
 #define BARCODE_MSI_PLESSEY	47
-#define BARCODE_FIM		49
+#define BARCODE_FIM		    49
 #define BARCODE_LOGMARS		50
 #define BARCODE_PHARMA		51
-#define BARCODE_PZN		52
+#define BARCODE_PZN		    52
 #define BARCODE_PHARMA_TWO	53
 #define BARCODE_PDF417		55
 #define BARCODE_PDF417TRUNC	56
@@ -133,7 +153,7 @@ struct zint_symbol {
 /* Tbarcode 8 codes */
 #define BARCODE_TELEPEN_NUM	87
 #define BARCODE_ITF14		89
-#define BARCODE_KIX		90
+#define BARCODE_KIX		    90
 #define BARCODE_AZTEC		92
 #define BARCODE_DAFT		93
 #define BARCODE_MICROQR		97
@@ -167,26 +187,27 @@ struct zint_symbol {
 
 #define BARCODE_NO_ASCII	1
 #define BARCODE_BIND		2
-#define BARCODE_BOX		4
+#define BARCODE_BOX		    4
 #define BARCODE_STDOUT		8
 #define READER_INIT		16
+#define SMALL_TEXT		32
 
-#define DATA_MODE	0
+#define DATA_MODE	    0
 #define UNICODE_MODE	1
-#define GS1_MODE	2
-#define KANJI_MODE	3
-#define SJIS_MODE	4
+#define GS1_MODE	    2
+#define KANJI_MODE	    3
+#define SJIS_MODE	    4
 
-#define DM_SQUARE	100
+#define DM_SQUARE	    100
 
-#define WARN_INVALID_OPTION	2
-#define ERROR_TOO_LONG		5
-#define ERROR_INVALID_DATA	6
-#define ERROR_INVALID_CHECK	7
-#define ERROR_INVALID_OPTION	8
-#define ERROR_ENCODING_PROBLEM	9
-#define ERROR_FILE_ACCESS	10
-#define ERROR_MEMORY		11
+#define ZWARN_INVALID_OPTION	2
+#define ZERROR_TOO_LONG		    5
+#define ZERROR_INVALID_DATA	    6
+#define ZERROR_INVALID_CHECK	7
+#define ZERROR_INVALID_OPTION	8
+#define ZERROR_ENCODING_PROBLEM	9
+#define ZERROR_FILE_ACCESS	    10
+#define ZERROR_MEMORY		    11
 
 #if defined(__WIN32__) || defined(_WIN32) || defined(WIN32) || defined(_MSC_VER)
 #  if defined (DLL_EXPORT) || defined(PIC) || defined(_USRDLL)
@@ -200,7 +221,7 @@ struct zint_symbol {
 #  define ZINT_EXTERN extern	
 #endif
 
-ZINT_EXTERN struct zint_symbol *ZBarcode_Create(void);
+ZINT_EXTERN struct zint_symbol* ZBarcode_Create(void);
 ZINT_EXTERN void ZBarcode_Clear(struct zint_symbol *symbol);
 ZINT_EXTERN void ZBarcode_Delete(struct zint_symbol *symbol);
 

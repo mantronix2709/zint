@@ -323,10 +323,10 @@ int imail(struct zint_symbol *symbol, unsigned char source[], int length)
 
 	if(length > 32) {
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	error_number = is_sane(SODIUM, source, length);
-	if(error_number == ERROR_INVALID_DATA) {
+	if(error_number == ZERROR_INVALID_DATA) {
 		strcpy(symbol->errtxt, "Invalid characters in data");
 		return error_number;
 	}
@@ -363,11 +363,11 @@ int imail(struct zint_symbol *symbol, unsigned char source[], int length)
 	
 	if(strlen(tracker) != 20) {
 		strcpy(symbol->errtxt, "Invalid length tracking code");
-		return ERROR_INVALID_DATA;
+		return ZERROR_INVALID_DATA;
 	}
 	if(strlen(zip) > 11) {
 		strcpy(symbol->errtxt, "Invalid ZIP code");
-		return ERROR_INVALID_DATA;
+		return ZERROR_INVALID_DATA;
 	}
 	
 	/* *** Step 1 - Conversion of Data Fields into Binary Data *** */
@@ -690,9 +690,9 @@ int imail(struct zint_symbol *symbol, unsigned char source[], int length)
 		read += 2;
 	}
 
-	symbol->row_height[0] = 2;
+	symbol->row_height[0] = 3;
 	symbol->row_height[1] = 2;
-	symbol->row_height[2] = 2;
+	symbol->row_height[2] = 3;
 
 	symbol->rows = 3;
 	symbol->width = read - 1;

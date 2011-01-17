@@ -47,10 +47,10 @@ int plessey(struct zint_symbol *symbol, unsigned char source[], int length)
 	
 	if(length > 65) {
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	error_number = is_sane(SSET, source, length);
-	if(error_number == ERROR_INVALID_DATA) {
+	if(error_number == ZERROR_INVALID_DATA) {
 		strcpy(symbol->errtxt, "Invalid characters in data");
 		return error_number;
 	}
@@ -105,7 +105,7 @@ int msi_plessey(struct zint_symbol *symbol, unsigned char source[], int length)
 	
 	if(length > 55) {
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 
 	/* start character */
@@ -137,7 +137,7 @@ int msi_plessey_mod10(struct zint_symbol *symbol, unsigned char source[], int le
 
 	if(length > 18) { 
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 
 	/* start character */
@@ -151,7 +151,7 @@ int msi_plessey_mod10(struct zint_symbol *symbol, unsigned char source[], int le
 
 	/* caluculate check digit */
 	wright = 0;
-	n = ((length % 2) == 0) ? 1 : 0;
+	n = !(length & 1);
 	for(i = n; i < length; i += 2)
 	{
 		un[wright++] = source[i];
@@ -170,7 +170,7 @@ int msi_plessey_mod10(struct zint_symbol *symbol, unsigned char source[], int le
 		pedwar += ctoi(tri[i]);
 	}
 
-	n = length % 2;
+	n = length & 1;
 	for(i = n; i < length; i+=2)
 	{
 		pedwar += ctoi(source[i]);
@@ -208,7 +208,7 @@ int msi_plessey_mod1010(struct zint_symbol *symbol, unsigned char source[], cons
 	
 	if(src_len > 18) { /* No Entry Stack Smashers! limit because of str->number conversion*/
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 
 	/* start character */
@@ -223,7 +223,7 @@ int msi_plessey_mod1010(struct zint_symbol *symbol, unsigned char source[], cons
 	/* calculate first check digit */
 	wright = 0;
 
-	n = ((src_len %2) == 0) ? 1 : 0;
+	n = !(src_len & 1);
 	for(i = n; i < src_len; i += 2)
 	{
 		un[wright++] = source[i];
@@ -242,7 +242,7 @@ int msi_plessey_mod1010(struct zint_symbol *symbol, unsigned char source[], cons
 		pedwar += ctoi(tri[i]);
 	}
 
-	n = src_len % 2;
+	n = src_len & 1;
 	for(i = n; i < src_len; i += 2)
 	{
 		pedwar += ctoi(source[i]);
@@ -256,7 +256,7 @@ int msi_plessey_mod1010(struct zint_symbol *symbol, unsigned char source[], cons
 
 	/* calculate second check digit */
 	wright = 0;
-	n = src_len % 2;
+	n = src_len & 1;
 	for(i = n; i < src_len; i += 2)
 	{
 		un[wright++] = source[i];
@@ -277,7 +277,7 @@ int msi_plessey_mod1010(struct zint_symbol *symbol, unsigned char source[], cons
 	}
 
 
-	i = ((src_len % 2) == 0) ? 1 : 0;
+	i = !(src_len & 1);
 	for(; i < src_len; i += 2)
 	{
 		pedwar += ctoi(source[i]);
@@ -321,7 +321,7 @@ int msi_plessey_mod11(struct zint_symbol *symbol, unsigned char source[], const 
 
 	if(src_len > 55) {
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	
 	/* start character */
@@ -385,7 +385,7 @@ int msi_plessey_mod1110(struct zint_symbol *symbol, unsigned char source[], cons
 
 	if(src_len > 18) {
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	
 	/* start character */
@@ -424,7 +424,7 @@ int msi_plessey_mod1110(struct zint_symbol *symbol, unsigned char source[], cons
 	
 	/* caluculate second (mod 10) check digit */
 	wright = 0;
-	i = ((temp_len % 2) == 0) ? 1 : 0;
+	i = !(temp_len & 1);
 	for(; i < temp_len; i += 2)
 	{
 		un[wright++] = temp[i];
@@ -443,7 +443,7 @@ int msi_plessey_mod1110(struct zint_symbol *symbol, unsigned char source[], cons
 		pedwar += ctoi(tri[i]);
 	}
 
-	i = temp_len % 2;
+	i = temp_len & 1;
 	for(; i < temp_len; i+=2)
 	{
 		pedwar += ctoi(temp[i]);
@@ -476,7 +476,7 @@ int msi_handle(struct zint_symbol *symbol, unsigned char source[], int length) {
 	error_number = is_sane(NEON, source, length);
 	if(error_number != 0) {
 		strcpy(symbol->errtxt, "Invalid characters in input data");
-		return ERROR_INVALID_DATA;
+		return ZERROR_INVALID_DATA;
 	}
 	
 

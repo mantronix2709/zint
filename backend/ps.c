@@ -62,7 +62,7 @@ int ps_plot(struct zint_symbol *symbol)
 	}
 	if(feps == NULL) {
 		strcpy(symbol->errtxt, "Could not open output file");
-		return ERROR_FILE_ACCESS;
+		return ZERROR_FILE_ACCESS;
 	}
 	
 	/* sort out colour options */
@@ -71,21 +71,21 @@ int ps_plot(struct zint_symbol *symbol)
 	
 	if(strlen(symbol->fgcolour) != 6) {
 		strcpy(symbol->errtxt, "Malformed foreground colour target");
-		return ERROR_INVALID_OPTION;
+		return ZERROR_INVALID_OPTION;
 	}
 	if(strlen(symbol->bgcolour) != 6) {
 		strcpy(symbol->errtxt, "Malformed background colour target");
-		return ERROR_INVALID_OPTION;
+		return ZERROR_INVALID_OPTION;
 	}
 	error_number = is_sane(SSET, (unsigned char*)symbol->fgcolour, strlen(symbol->fgcolour));
-	if (error_number == ERROR_INVALID_DATA) {
+	if (error_number == ZERROR_INVALID_DATA) {
 		strcpy(symbol->errtxt, "Malformed foreground colour target");
-		return ERROR_INVALID_OPTION;
+		return ZERROR_INVALID_OPTION;
 	}
 	error_number = is_sane(SSET, (unsigned char*)symbol->bgcolour, strlen(symbol->bgcolour));
-	if (error_number == ERROR_INVALID_DATA) {
+	if (error_number == ZERROR_INVALID_DATA) {
 		strcpy(symbol->errtxt, "Malformed background colour target");
-		return ERROR_INVALID_OPTION;
+		return ZERROR_INVALID_OPTION;
 	}
 	locale = setlocale(LC_ALL, "C");
 	
@@ -256,11 +256,9 @@ int ps_plot(struct zint_symbol *symbol)
 					dy = my - 1.0 + yoffset;
 					ey = my - 0.5 + yoffset;
 					fy = my + 0.5 + yoffset;
-					if(r % 2 == 1) {
-						mx = (2.46 * i) + 1.23 + 1.23;
-					} else {
-						mx = (2.46 * i) + 1.23;
-					}
+
+					mx = 2.46 * i + 1.23 + (r & 1 ? 1.23 : 0);
+
 					ax = mx + xoffset;
 					bx = mx + 0.86 + xoffset;
 					cx = mx + 0.86 + xoffset;
@@ -752,8 +750,8 @@ int ps_plot(struct zint_symbol *symbol)
 		fprintf(feps, "setmatrix\n");
 	}
 	fprintf(feps, "\nshowpage\n");
-	
-	fclose(feps);
+    if((symbol->output_options & BARCODE_STDOUT) == 0)	
+	    fclose(feps);
 	
 	if (locale)
 		setlocale(LC_ALL, locale);

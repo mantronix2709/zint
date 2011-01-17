@@ -10,7 +10,7 @@
 ;******************************************************************************
 !define PRODUCT_NAME "Zint"
 !define PRODUCT_EXE "qtZint.exe"
-!define PRODUCT_VERSION "2.3.0.0"
+!define PRODUCT_VERSION "2.4.1.0"
 !define PRODUCT_WEB_SITE "http://www.zint.org.uk"
 !define PRODUCT_PUBLISHER "Robin Stuart & BogDan Vatra"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_EXE}"
@@ -21,7 +21,7 @@ Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "Setup_${PRODUCT_NAME}_${PRODUCT_VERSION}.exe"
 BrandingText "GPLv3, ${PRODUCT_PUBLISHER}"
 ;******************************************************************************
-;ShowInstDetails show -ne zapisuje podatke u log datoteku
+;ShowInstDetails show
 ShowInstDetails show
 ShowUnInstDetails show
 
@@ -107,25 +107,26 @@ FunctionEnd
 Section ${PRODUCT_NAME} SEC01
   SectionIn RO
   Call startInstall
-  
   SetOverwrite ifnewer
   File ".\frontend_qt4\release\${PRODUCT_EXE}"
-  File ".\win32\Release\zint.exe"
+  File ".\backend\zlib1.dll"
+  File ".\backend\libpng14.dll"
+  File ".\backend\zint.dll"
+  File ".\frontend\zint.exe"
+  File "zint.sha1"
   
   WriteUninstaller "$INSTDIR\uninst.exe"
 
 !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\qtZint.lnk" "$INSTDIR\${PRODUCT_EXE}"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Zint Barcode Studio.lnk" "$INSTDIR\${PRODUCT_EXE}"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk" "$INSTDIR\uninst.exe"
 !insertmacro MUI_STARTMENU_WRITE_END
-  
 SectionEnd
 ;******************************************************************************
 Section -Post
   WriteRegStr SHCTX  "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\${PRODUCT_EXE}"
   WriteRegStr SHCTX  "${PRODUCT_DIR_REGKEY}" "Path" "$INSTDIR"
-  
   WriteRegStr SHCTX  "${PRODUCT_UNINST_KEY}" "DisplayName" "${PRODUCT_NAME}"
   WriteRegStr SHCTX  "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr SHCTX  "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\${PRODUCT_EXE}"
@@ -188,10 +189,13 @@ Section Uninstall
   RmDir /r "$SMPROGRAMS\$ICONS_GROUP"
   Delete /REBOOTOK "$INSTDIR\${PRODUCT_EXE}"
   Delete /REBOOTOK "$INSTDIR\zint.exe"
+  Delete /REBOOTOK "$INSTDIR\zint.dll"
+  Delete /REBOOTOK "$INSTDIR\libpng14.dll"
+  Delete /REBOOTOK "$INSTDIR\zint.sha1"
+  Delete /REBOOTOK "$INSTDIR\zlib1.dll"
   Delete /REBOOTOK "$INSTDIR\uninst.exe"
   Delete /REBOOTOK "$INSTDIR\install.log"
   RmDir /REBOOTOK "$INSTDIR"
-  
 SectionEnd
 ;******************************************************************************
 VIProductVersion ${PRODUCT_VERSION}
@@ -199,7 +203,7 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "${PRODUCT_NAME}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "${PRODUCT_PUBLISHER}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${PRODUCT_NAME} Setup"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${PRODUCT_VERSION}"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright © 2009 Robin Stuart & BogDan Vatra"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright © 2011 Robin Stuart & BogDan Vatra"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "License" "GNU General Public License version 3"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "WWW" "${PRODUCT_WEB_SITE}"
 ;******************************************************************************

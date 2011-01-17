@@ -1,4 +1,4 @@
-# Linux makefile for zint - requires libzint
+# MinGW makefile for zint - requires libzint
 #
 # make			compiles zint
 # make install		copies binary to /usr/bin
@@ -6,24 +6,31 @@
 # make clean		cleans up a previous compilation and any object or editor files
 #
 
-ZINT_VERSION:=-DZINT_VERSION=\"2.3.2\"
+ZINT_VERSION:=-DZINT_VERSION=\"2.4.1\"
 
-CC := gcc
-CFLAGS := -D_WIN32 -O2 -fms-extensions -mms-bitfields -fno-exceptions -fomit-frame-pointer -Wall -I../backend
+CC := gcc -m32
+CFLAGS := -O2 -fms-extensions -mms-bitfields -fno-exceptions -fomit-frame-pointer -Wall -I../backend
 prefix := /mingw
 bindir := $(prefix)/bin
 DESTDIR :=
 
+ifeq ($(NO_PNG),true)
+DEFINES+= -DNO_PNG
+else
+DEFINES_DLL+= -DPNG_DLL -DZLIB_DLL
+LIBS+= -lpng -lz
+endif
+
 all: zint zint_static
 
 %.res:%.rc
-	windres -O coff --input-format=rc -i $< -o $@
+	windres -v -F pe-i386 --define GCC_WINDRES -O coff --input-format=rc -i $< -o $@
 
 zint: main.c zint.res
-	$(CC) $(CFLAGS) -DZINT_DLL -DPNG_DLL -DZLIB_DLL $(ZINT_VERSION)  $? zint.res -o $@ -L../backend  -lzint
+	$(CC) $(CFLAGS) -DZINT_DLL $(DEFINES_DLL) $(ZINT_VERSION)  $? zint.res -o $@ -L../backend -lzint.dll $(LIBS)
 
 zint_static: main.c zint.res
-	$(CC) -static $(CFLAGS) $(ZINT_VERSION) $? zint.res -o $@ -L../backend -lzint -lpng -lz
+	$(CC) -static $(CFLAGS) $(ZINT_VERSION) $? zint.res -o $@ -L../backend -lzint $(LIBS)
 
 .PHONY: install uninstall clean dist
 

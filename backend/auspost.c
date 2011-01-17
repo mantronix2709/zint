@@ -111,7 +111,8 @@ int australia_post(struct zint_symbol *symbol, unsigned char source[], int lengt
 	unsigned int loopey, reader, h;
 
 	char data_pattern[200];
-	char fcc[3], dpid[10];
+	char fcc[3] = { 0 };
+	char dpid[10];
 	char localstr[30];
 
 	error_number = 0;
@@ -128,17 +129,17 @@ int australia_post(struct zint_symbol *symbol, unsigned char source[], int lengt
 			case 18: strcpy(fcc, "62"); break;
 			case 23: strcpy(fcc, "62"); error_number = is_sane(NEON, source, length); break;
 			default: strcpy(symbol->errtxt, "Auspost input is wrong length");
-			return ERROR_TOO_LONG;
+			return ZERROR_TOO_LONG;
 				break;
 		}
-		if(error_number == ERROR_INVALID_DATA) {
+		if(error_number == ZERROR_INVALID_DATA) {
 			strcpy(symbol->errtxt, "Invalid characters in data");
 			return error_number;
 		}
 	} else {
 		if(length > 8) {
 			strcpy(symbol->errtxt, "Auspost input is too long");
-			return ERROR_TOO_LONG;
+			return ZERROR_TOO_LONG;
 		}
 		switch(symbol->symbology) {
 			case BARCODE_AUSREPLY: strcpy(fcc, "45"); break;
@@ -155,7 +156,7 @@ int australia_post(struct zint_symbol *symbol, unsigned char source[], int lengt
 	concat(localstr, (char*)source);
 	h = strlen(localstr);
 	error_number = is_sane(GDSET, (unsigned char *)localstr, h);
-	if(error_number == ERROR_INVALID_DATA) {
+	if(error_number == ZERROR_INVALID_DATA) {
 		strcpy(symbol->errtxt, "Invalid characters in data");
 		return error_number;
 	}
@@ -164,7 +165,7 @@ int australia_post(struct zint_symbol *symbol, unsigned char source[], int lengt
 	memcpy(dpid, localstr, 8);
 	dpid[8] = '\0';
 	error_number = is_sane(NEON, (unsigned char *)dpid, strlen(dpid));
-	if(error_number == ERROR_INVALID_DATA) {
+	if(error_number == ZERROR_INVALID_DATA) {
 		strcpy(symbol->errtxt, "Invalid characters in DPID");
 		return error_number;
 	}
@@ -236,9 +237,9 @@ int australia_post(struct zint_symbol *symbol, unsigned char source[], int lengt
 		writer += 2;
 	}
 
-	symbol->row_height[0] = 4;
+	symbol->row_height[0] = 3;
 	symbol->row_height[1] = 2;
-	symbol->row_height[2] = 4;
+	symbol->row_height[2] = 3;
 
 	symbol->rows = 3;
 	symbol->width = writer - 1;

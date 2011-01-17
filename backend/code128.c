@@ -214,7 +214,7 @@ int code_128(struct zint_symbol *symbol, unsigned char source[], int length)
 		/* This only blocks rediculously long input - the actual length of the
 		   resulting barcode depends on the type of data, so this is trapped later */
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	
 	/* Detect extended ASCII characters */
@@ -290,7 +290,7 @@ int code_128(struct zint_symbol *symbol, unsigned char source[], int length)
 	dxsmooth(&indexliste);
 
 	/* Resolve odd length LATCHC blocks */
-	if((list[1][0] == LATCHC) && ((list[0][0] % 2) == 1)) {
+	if((list[1][0] == LATCHC) && (list[0][0] & 1)) {
 		/* Rule 2 */
 		list[0][1]++;
 		list[0][0]--;
@@ -302,7 +302,7 @@ int code_128(struct zint_symbol *symbol, unsigned char source[], int length)
 	}	
 	if(indexliste > 1) {
 		for(i = 1; i < indexliste; i++) {
-			if((list[1][i] == LATCHC) && ((list[0][i] % 2) == 1)) {
+			if((list[1][i] == LATCHC) && (list[0][i] & 1)) {
 				/* Rule 3b */
 				list[0][i - 1]++;
 				list[0][i]--;
@@ -385,7 +385,7 @@ int code_128(struct zint_symbol *symbol, unsigned char source[], int length)
 	}
 	if(glyph_count > 80.0) {
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	
 	
@@ -619,13 +619,13 @@ int ean_128(struct zint_symbol *symbol, unsigned char source[], int length)
 		/* This only blocks rediculously long input - the actual length of the
 		resulting barcode depends on the type of data, so this is trapped later */
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	for(i = 0; i < length; i++) {
 		if(source[i] == '\0') {
 			/* Null characters not allowed! */
 			strcpy(symbol->errtxt, "NULL character in input data");
-			return ERROR_INVALID_DATA;
+			return ZERROR_INVALID_DATA;
 		}
 	}
 	
@@ -688,7 +688,7 @@ int ean_128(struct zint_symbol *symbol, unsigned char source[], int length)
 	for(i = 0; i < read; i++) {
 		if(set[i] == 'C') {
 			if(reduced[i] == '[') {
-				if(c_count % 2) {
+				if(c_count & 1) {
 					if((i - c_count) != 0) {
 						set[i - c_count] = 'B';
 					} else {
@@ -700,7 +700,7 @@ int ean_128(struct zint_symbol *symbol, unsigned char source[], int length)
 				c_count++;
 			}
 		} else {
-			if(c_count % 2) {
+			if(c_count & 1) {
 				if((i - c_count) != 0) {
 					set[i - c_count] = 'B';
 				} else {
@@ -710,7 +710,7 @@ int ean_128(struct zint_symbol *symbol, unsigned char source[], int length)
 			c_count = 0;
 		}
 	}
-	if(c_count % 2) {
+	if(c_count & 1) {
 		if((i - c_count) != 0) {
 			set[i - c_count] = 'B';
 		} else {
@@ -750,7 +750,7 @@ int ean_128(struct zint_symbol *symbol, unsigned char source[], int length)
 	}
 	if(glyph_count > 80.0) {
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	
 	/* So now we know what start character to use - we can get on with it! */
@@ -923,11 +923,11 @@ int nve_18(struct zint_symbol *symbol, unsigned char source[], int length)
 	
 	if(sourcelen > 17) {
 		strcpy(symbol->errtxt, "Input too long");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	
 	error_number = is_sane(NEON, source, length);
-	if(error_number == ERROR_INVALID_DATA) {
+	if(error_number == ZERROR_INVALID_DATA) {
 		strcpy(symbol->errtxt, "Invalid characters in data");
 		return error_number;
 	}
@@ -941,7 +941,7 @@ int nve_18(struct zint_symbol *symbol, unsigned char source[], int length)
 	{
 		total_sum += ctoi(source[i]);
 		
-		if(!((i%2) == 1)) {
+		if(!(i & 1)) {
 			total_sum += 2 * ctoi(source[i]);
 		}
 	}
@@ -964,11 +964,11 @@ int ean_14(struct zint_symbol *symbol, unsigned char source[], int length)
 	
 	if(length > 13) {
 		strcpy(symbol->errtxt, "Input wrong length");
-		return ERROR_TOO_LONG;
+		return ZERROR_TOO_LONG;
 	}
 	
 	error_number = is_sane(NEON, source, length);
-	if(error_number == ERROR_INVALID_DATA) {
+	if(error_number == ZERROR_INVALID_DATA) {
 		strcpy(symbol->errtxt, "Invalid character in data");
 		return error_number;
 	}
@@ -979,12 +979,10 @@ int ean_14(struct zint_symbol *symbol, unsigned char source[], int length)
 	ustrcpy(ean128_equiv + 4 + zeroes, source);
 	
 	count = 0;
-	for (i = length - 1; i >= 0; i--)
-	{
+	for (i = length - 1; i >= 0; i--) {
 		count += ctoi(source[i]);
 
-		if (!((i % 2) == 1))
-		{
+		if (!(i & 1)) {
 			count += 2 * ctoi(source[i]);
 		}
 	}

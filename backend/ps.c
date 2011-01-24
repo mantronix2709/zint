@@ -54,17 +54,7 @@ int ps_plot(struct zint_symbol *symbol)
 	strcpy(addon, "");
 	comp_offset = 0;
 	addon_text_posn = 0.0;
-	
-	if((symbol->output_options & BARCODE_STDOUT) != 0) {
-		feps = stdout;
-	} else {
-		feps = fopen(symbol->outfile, "w");
-	}
-	if(feps == NULL) {
-		strcpy(symbol->errtxt, "Could not open output file");
-		return ZERROR_FILE_ACCESS;
-	}
-	
+		
 	/* sort out colour options */
 	to_upper((unsigned char*)symbol->fgcolour);
 	to_upper((unsigned char*)symbol->bgcolour);
@@ -86,6 +76,16 @@ int ps_plot(struct zint_symbol *symbol)
 	if (error_number == ZERROR_INVALID_DATA) {
 		strcpy(symbol->errtxt, "Malformed background colour target");
 		return ZERROR_INVALID_OPTION;
+	}
+
+	if((symbol->output_options & BARCODE_STDOUT) != 0) {
+		feps = stdout;
+	} else {
+		feps = fopen(symbol->outfile, "w");
+	}
+	if(feps == NULL) {
+		strcpy(symbol->errtxt, "Could not open output file");
+		return ZERROR_FILE_ACCESS;
 	}
 	locale = setlocale(LC_ALL, "C");
 	

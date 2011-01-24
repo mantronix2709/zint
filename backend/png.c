@@ -453,7 +453,7 @@ int png_to_file(struct zint_symbol *symbol, int image_height, int image_width, c
 	int error_number;
 	float scaler = symbol->scale;
 	char *scaled_pixelbuf;
-	int horiz, vert, i;
+	int horiz, vert;
 	int scale_width, scale_height;
 	
 	if(scaler == 0) { scaler = 0.5; }
@@ -461,14 +461,11 @@ int png_to_file(struct zint_symbol *symbol, int image_height, int image_width, c
 	scale_height = image_height * scaler;
 	
 	/* Apply scale options by creating another pixel buffer */
-	if (!(scaled_pixelbuf = (char *) malloc(scale_width * scale_height))) {
+	if ((scaled_pixelbuf = (char *) malloc(scale_width * scale_height)) == NULL) {
 		printf("Insufficient memory for pixel buffer");
 		return ZERROR_ENCODING_PROBLEM;
-	} else {
-		for(i = 0; i < (scale_width * scale_height); i++) {
-			*(scaled_pixelbuf + i) = '0';
-		}
 	}
+	memset(scaled_pixelbuf, '0', scale_width * scale_height);
 	
 	for(vert = 0; vert < scale_height; vert++) {
 		for(horiz = 0; horiz < scale_width; horiz++) {
@@ -480,7 +477,7 @@ int png_to_file(struct zint_symbol *symbol, int image_height, int image_width, c
 #ifndef NO_PNG
 		error_number = png_pixel_plot(symbol, scale_height, scale_width, scaled_pixelbuf, rotate_angle);
 #else
-		return ZERROR_INVALID_OPTION;
+		error_number = ZERROR_INVALID_OPTION;
 #endif
 	} else {
 		error_number = bmp_pixel_plot(symbol, scale_height, scale_width, scaled_pixelbuf, rotate_angle);

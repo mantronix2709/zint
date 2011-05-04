@@ -208,7 +208,7 @@ int batch_process(struct zint_symbol *symbol, char *filename)
 	char adjusted[2] = { 0 };
 
 	if(symbol->outfile[0] == '\0') {
-		strcpy(format_string, "$$$$$.png");
+		strcpy(format_string, "~~~~~.png");
 	} else {
 		if(strlen(symbol->outfile) < FILENAME_MAX) {
 			strcpy(format_string, symbol->outfile);
@@ -268,7 +268,7 @@ int batch_process(struct zint_symbol *symbol, char *filename)
 					adjusted[0] = ' ';
 				}
 				break;
-			case '$':
+			case '~':
 				if (inpos > 0) {
 					adjusted[0] = reverse_number[inpos - 1];
 					inpos--;
@@ -276,7 +276,7 @@ int batch_process(struct zint_symbol *symbol, char *filename)
 					adjusted[0] = '0';
 				}
 				break;
-			case '*':
+			case '@':
 				if (inpos > 0) {
 					adjusted[0] = reverse_number[inpos - 1];
 					inpos--;
@@ -585,6 +585,7 @@ int main(int argc, char **argv)
 
 		case 'o':
 			strncpy(my_symbol->outfile, optarg, FILENAME_MAX - 1);
+            my_symbol->outfile[FILENAME_MAX - 1] = 0;
 			break;
 
 		case 'r':

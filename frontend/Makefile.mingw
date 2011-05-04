@@ -6,10 +6,11 @@
 # make clean		cleans up a previous compilation and any object or editor files
 #
 
-ZINT_VERSION:=-DZINT_VERSION=\"2.4.1\"
+ZINT_VERSION:=-DZINT_VERSION=\"2.4.2\"
 
 CC := gcc -m32
 CFLAGS := -O2 -fms-extensions -mms-bitfields -fno-exceptions -fomit-frame-pointer -Wall -I../backend
+LDFLAGS = -Wl,--major-image-version=2 -Wl,--minor-image-version=42
 prefix := /mingw
 bindir := $(prefix)/bin
 DESTDIR :=
@@ -27,10 +28,10 @@ all: zint zint_static
 	windres -v -F pe-i386 --define GCC_WINDRES -O coff --input-format=rc -i $< -o $@
 
 zint: main.c zint.res
-	$(CC) $(CFLAGS) -DZINT_DLL $(DEFINES_DLL) $(ZINT_VERSION)  $? zint.res -o $@ -L../backend -lzint.dll $(LIBS)
+	$(CC) $(CFLAGS) -DZINT_DLL $(DEFINES_DLL) $(ZINT_VERSION) $(LDFLAGS) $? zint.res -o $@ -L../backend -lzint.dll $(LIBS)
 
 zint_static: main.c zint.res
-	$(CC) -static $(CFLAGS) $(ZINT_VERSION) $? zint.res -o $@ -L../backend -lzint $(LIBS)
+	$(CC) -static $(CFLAGS) $(ZINT_VERSION) $(LDFLAGS) $? zint.res -o $@ -L../backend -lzint $(LIBS)
 
 .PHONY: install uninstall clean dist
 

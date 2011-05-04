@@ -669,12 +669,14 @@ struct zint_render_line *render_plot_create_line(float x, float y, float width, 
 	struct zint_render_line *line;
 	
 	line = (struct zint_render_line*)malloc(sizeof(struct zint_render_line));
-	line->next = NULL;
-	line->x = x;
-	line->y = y;
-	line->width = width;
-	line->length = length;	
-
+    if (line) 
+    {
+    	line->next = NULL;
+    	line->x = x;
+    	line->y = y;
+    	line->width = width;
+    	line->length = length;	
+    }
 	return line;
 }
 
@@ -698,12 +700,14 @@ struct zint_render_ring *render_plot_create_ring(float x, float y, float radius,
 	struct zint_render_ring *ring;
 	
 	ring = (struct zint_render_ring*)malloc(sizeof(struct zint_render_ring));
-	ring->next = NULL;
-	ring->x = x;
-	ring->y = y;
-	ring->radius = radius;
-	ring->line_width = line_width;
-	
+    if (ring)
+    {
+    	ring->next = NULL;
+    	ring->x = x;
+    	ring->y = y;
+    	ring->radius = radius;
+    	ring->line_width = line_width;
+    }	
 	return ring;
 }
 
@@ -723,10 +727,12 @@ struct zint_render_hexagon *render_plot_create_hexagon(float x, float y)
 	struct zint_render_hexagon *hexagon;
 	
 	hexagon = (struct zint_render_hexagon*)malloc(sizeof(struct zint_render_hexagon));
-	hexagon->next = NULL;
-	hexagon->x = x;
-	hexagon->y = y;
-	
+    if (hexagon)
+    {
+    	hexagon->next = NULL;
+    	hexagon->x = x;
+    	hexagon->y = y;
+    }	
 	return hexagon;
 }
 
@@ -752,20 +758,24 @@ int render_plot_add_string(struct zint_symbol *symbol,
 	struct zint_render_string *string;
 
 	string = (struct zint_render_string*)malloc(sizeof(struct zint_render_string));
-	string->next = NULL;
-	string->x = x;
-	string->y = y;
-	string->width = width; 
-	string->fsize = fsize;
-	string->length = ustrlen(text);
-	string->text = (unsigned char*)malloc(sizeof(unsigned char) * (ustrlen(text) + 1));
-	ustrcpy(string->text, text);
+    if (string)
+    {
+    	string->next = NULL;
+    	string->x = x;
+    	string->y = y;
+    	string->width = width; 
+    	string->fsize = fsize;
+    	string->length = ustrlen(text);
+    	string->text = (unsigned char*)malloc(sizeof(unsigned char) * (ustrlen(text) + 1));
 
-	if (*last_string)
-		(*last_string)->next = string;
-	else
-		symbol->rendered->strings = string; // First character
-	*last_string = string;
+        if (string->text)
+	       ustrcpy(string->text, text);
 
+    	if (*last_string)
+    		(*last_string)->next = string;
+    	else
+    		symbol->rendered->strings = string; // First character
+    	*last_string = string;
+    }
 	return 1;
 }

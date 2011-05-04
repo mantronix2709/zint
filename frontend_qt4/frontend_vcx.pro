@@ -3,7 +3,8 @@ TARGET = qtZint
 CONFIG += 	warn_on \
 			thread \
 			qt \
-			uitools
+			uitools \
+			release
 
 FORMS = mainWindow.ui \
 		extSequence.ui \ 

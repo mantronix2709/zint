@@ -680,61 +680,32 @@ int maxi_png_plot(struct zint_symbol *symbol, int rotate_angle, int data_type)
 	return error_number;
 }
 
-void to_latin1(unsigned char source[], unsigned char preprocessed[])
-{
-	int j, i, input_length;
-	
-	input_length = ustrlen(source);
-	
-	j = 0;
-	i = 0;
-	do {
-		if(source[i] < 128) {
-			preprocessed[j] = source[i];
-			j++;
-			i++;
-		} else {
-			if(source[i] == 0xC2) {
-				preprocessed[j] = source[i + 1];
-				j++;
-				i += 2;
-			}
-			if(source[i] == 0xC3) {
-				preprocessed[j] = source[i + 1] + 64;
-				j++;
-				i += 2;
-			}
-		}
-	} while (i < input_length);
-	preprocessed[j] = '\0';
-	
-	return;
-}
-
 int png_plot(struct zint_symbol *symbol, int rotate_angle, int data_type)
 {
 	int textdone, main_width, comp_offset, large_bar_count;
 	char textpart[10], addon[6];
 	float addon_text_posn, preset_height, large_bar_height;
 	int i, r, textoffset, yoffset, xoffset, latch, image_width, image_height;
-	char *pixelbuf;
+	char *pixelbuf = NULL;
 	int addon_latch = 0, smalltext = 0;
 	int this_row, block_width, plot_height, plot_yposn, textpos;
 	float row_height, row_posn;
 	int error_number;
 	int default_text_posn;
 	int next_yposn;
-#ifndef _MSC_VER
-	unsigned char local_text[ustrlen(symbol->text) + 1];
-#else
-	unsigned char* local_text = (unsigned char*)_alloca(ustrlen(symbol->text) + 1);
-#endif
+	unsigned char* local_text = NULL;
+	int tlen = ustrlen(symbol->text);
 
-	if(symbol->show_hrt != 0) {
-		to_latin1(symbol->text, local_text);
-	} else {
-		local_text[0] = '\0';
+	if (tlen) {
+		local_text = (unsigned char*)calloc(tlen + 1, sizeof(char));
+		if (NULL == local_text) {
+			strcpy(symbol->errtxt, "Out of memory");
+			return ZERROR_MEMORY;
+		}
 	}
+
+	if(symbol->show_hrt != 0 && tlen)
+		latin1_process(symbol->text, local_text, &tlen);
 
 	textdone = 0;
 	main_width = symbol->width;
@@ -773,7 +744,7 @@ int png_plot(struct zint_symbol *symbol, int rotate_angle, int data_type)
 	/* Certain symbols need whitespace otherwise characters get chopped off the sides */
 	if ((((symbol->symbology == BARCODE_EANX) && (symbol->rows == 1)) || (symbol->symbology == BARCODE_EANX_CC))
 		|| (symbol->symbology == BARCODE_ISBNX)) {
-		switch(ustrlen(local_text)) {
+		switch(tlen) {
 			case 13: /* EAN 13 */
 			case 16:
 			case 19:
@@ -805,7 +776,7 @@ int png_plot(struct zint_symbol *symbol, int rotate_angle, int data_type)
 	r = 0;
 	/* Isolate add-on text */
 	if(is_extendable(symbol->symbology)) {
-		for(i = 0; i < ustrlen(local_text); i++) {
+		for(i = 0; i < tlen; i++) {
 			if (latch == 1) {
 				addon[r] = local_text[i];
 				r++;
@@ -817,7 +788,7 @@ int png_plot(struct zint_symbol *symbol, int rotate_angle, int data_type)
 	}
 	addon[r] = '\0';
 	
-	if(ustrlen(local_text) != 0) {
+	if(tlen) {
 		textoffset = 9;
 	} else {
 		textoffset = 0;
@@ -829,6 +800,9 @@ int png_plot(struct zint_symbol *symbol, int rotate_angle, int data_type)
 	
 	if (!(pixelbuf = (char *) malloc(image_width * image_height))) {
 		printf("Insufficient memory for pixel buffer");
+		if(local_text)
+			free(local_text);
+
 		return ZERROR_ENCODING_PROBLEM;
 	} else {
 		for(i = 0; i < (image_width * image_height); i++) {
@@ -894,7 +868,7 @@ int png_plot(struct zint_symbol *symbol, int rotate_angle, int data_type)
 
 	if ((((symbol->symbology == BARCODE_EANX) && (symbol->rows == 1)) || (symbol->symbology == BARCODE_EANX_CC)) || (symbol->symbology == BARCODE_ISBNX)) {
 		/* guard bar extensions and text formatting for EAN8 and EAN13 */
-		switch(ustrlen(local_text)) {
+		switch(tlen) {
 			case 8: /* EAN-8 */
 			case 11:
 			case 14:
@@ -1105,13 +1079,17 @@ int png_plot(struct zint_symbol *symbol, int rotate_angle, int data_type)
 	}
 	
 	/* Put the human readable text at the bottom */
-	if((textdone == 0) && (ustrlen(local_text) != 0)) {
+	if((textdone == 0) && tlen) {
 		textpos = (image_width / 2);
 		draw_string(pixelbuf, (char*)local_text, textpos, default_text_posn, smalltext, image_width, image_height);
 	}
 
 	error_number=png_to_file(symbol, image_height, image_width, pixelbuf, rotate_angle, data_type);
 	free(pixelbuf);
+	
+	if (local_text)
+		free(local_text);
+
 	return error_number;
 }
 

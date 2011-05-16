@@ -469,8 +469,11 @@ int reduced_charset(struct zint_symbol *symbol, unsigned char *source, int lengt
 			preprocessed[length] = '\0';
 			break;
 		case UNICODE_MODE:
-			error_number = latin1_process(symbol, source, preprocessed, &length);
-			if(error_number != 0) { return error_number; }
+			error_number = latin1_process(source, preprocessed, &length);
+			if(error_number != 0) { 
+				strcpy(symbol->errtxt, "error: Invalid character in input string (only Latin-1 characters supported)");
+				return error_number; 
+			}
 			break;
 	}
 

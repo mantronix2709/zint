@@ -680,8 +680,11 @@ int aztec(struct zint_symbol *symbol, unsigned char source[], int length)
 			local_source[length] = '\0';
 			break;
 		case UNICODE_MODE:
-			err_code = latin1_process(symbol, source, local_source, &length);
-			if(err_code != 0) { return err_code; }
+			err_code = latin1_process(source, local_source, &length);
+			if(err_code != 0) { 
+				strcpy(symbol->errtxt, "error: Invalid character in input string (only Latin-1 characters supported)");
+				return err_code; 
+			}
 			break;
 	}
 	
@@ -1317,7 +1320,7 @@ int aztec_runes(struct zint_symbol *symbol, unsigned char source[], int length)
 	rs_encode(2, data_codewords, ecc_codewords);
 	rs_free();
 	
-	strcpy(binary_string, "");
+	memset(binary_string, 0, 28);
 	
 	for(i = 0; i < 5; i++) {
 		if(ecc_codewords[4 - i] & 0x08) { binary_string[(i * 4) + 8] = '1'; } else { binary_string[(i * 4) + 8] = '0'; }

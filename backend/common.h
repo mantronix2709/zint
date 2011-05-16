@@ -61,7 +61,7 @@ extern void unset_module(struct zint_symbol *symbol, int y_coord, int x_coord);
 extern int istwodigits(unsigned char source[], int position);
 extern float froundup(float input);
 extern int parunmodd(unsigned char llyth);
-extern int latin1_process(struct zint_symbol *symbol, unsigned char source[], unsigned char preprocessed[], int *length);
+extern int latin1_process(unsigned char source[], unsigned char preprocessed[], int *length);
 extern int utf8toutf16(struct zint_symbol *symbol, unsigned char source[], int vals[], int *length);
 #ifdef __cplusplus
 }

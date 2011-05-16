@@ -5,8 +5,8 @@ VS_VERSION_INFO		VERSIONINFO
 #else
 VS_VERSION_INFO VERSIONINFO
 #endif
- FILEVERSION 2,4,1,0
- PRODUCTVERSION 2,4,1,0
+ FILEVERSION 2,4,3,0
+ PRODUCTVERSION 2,4,3,0
   FILEFLAGSMASK		VS_FFI_FILEFLAGSMASK
 #ifdef _DEBUG
   FILEFLAGS		VS_FF_DEBUG
@@ -23,13 +23,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Robin Stuart & BogDan Vatra"
             VALUE "FileDescription", "qtZint barcode generator"
-            VALUE "FileVersion", "2.4.1.0"
+            VALUE "FileVersion", "2.4.3.0"
             VALUE "InternalName", "qtZint"
-            VALUE "LegalCopyright", "Copyright © 2010 Robin Stuart & BogDan Vatra"
+            VALUE "LegalCopyright", "Copyright © 2011 Robin Stuart & BogDan Vatra"
             VALUE "License", "GNU General Public License version 3"
             VALUE "OriginalFilename", "qtZint"
             VALUE "ProductName", "Zint Barcode Studio"
-            VALUE "ProductVersion", "2.4.1.0"
+            VALUE "ProductVersion", "2.4.3.0"
             VALUE "WWW", "http://www.zint.org.uk"
         END
     END
@@ -38,4 +38,4 @@ BEGIN
         VALUE "Translation", 0x9, 1200
     END
 END
-100 ICON MOVEABLE PURE LOADONCALL DISCARDABLE "zint.ico"
+IDI_ICON1               ICON    DISCARDABLE  "zint.ico"

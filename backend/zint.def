@@ -5,7 +5,7 @@
 LIBRARY
 
 EXPORTS
-;Version 2.4.0
+;Version 2.4.3
 DllGetVersion
 
 ZBarcode_Create

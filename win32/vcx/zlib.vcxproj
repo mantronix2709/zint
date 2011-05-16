@@ -90,8 +90,8 @@
     <OutDir>$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Library|Win32'">
-    <IntDir>$(Configuration)\Tmp\</IntDir>
-    <TargetName>$(ProjectName)125</TargetName>
+    <IntDir>$(Configuration)\zlib\</IntDir>
+    <TargetName>$(ProjectName)125d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Library|Win32'">
     <OutDir>$(Configuration)\</OutDir>
@@ -108,6 +108,12 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <BrowseInformation>false</BrowseInformation>
+      <ExceptionHandling>false</ExceptionHandling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>

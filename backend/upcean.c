@@ -376,8 +376,8 @@ char isbn13_check(unsigned char source[]) /* For ISBN(13) only */
 		if(weight == 1) weight = 3; else weight = 1;
 	}
 
-	check = sum % 10;
-	check = 10 - check;
+	check = (10 - (sum % 10))  % 10;
+
 	return itoc(check);
 }
 

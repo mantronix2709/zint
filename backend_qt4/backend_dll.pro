@@ -8,7 +8,7 @@ macx{
 }
 
 TARGET = QtZint2
-VERSION = 2.4.1
+VERSION = 2.4.3
 
 INCLUDEPATH += ../backend
 

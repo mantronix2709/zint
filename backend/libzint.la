@@ -24,7 +24,7 @@ weak_library_names=''
 # Version information for libz.
 current=2
 age=4
-revision=1
+revision=3
 
 # Is this an already installed library?
 installed=yes

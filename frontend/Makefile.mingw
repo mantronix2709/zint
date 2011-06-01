@@ -6,11 +6,11 @@
 # make clean		cleans up a previous compilation and any object or editor files
 #
 
-ZINT_VERSION:=-DZINT_VERSION=\"2.4.2\"
+ZINT_VERSION:=-DZINT_VERSION=\"2.4.3.0\"
 
 CC := gcc -m32
 CFLAGS := -O2 -fms-extensions -mms-bitfields -fno-exceptions -fomit-frame-pointer -Wall -I../backend
-LDFLAGS = -Wl,--major-image-version=2 -Wl,--minor-image-version=42
+LDFLAGS = -Wl,--major-image-version=2 -Wl,--minor-image-version=43
 prefix := /mingw
 bindir := $(prefix)/bin
 DESTDIR :=

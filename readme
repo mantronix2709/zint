@@ -59,6 +59,12 @@ Visual Studio. Correct bug preventing compilation without PNG support.
 Version 2.4.2:
 Fix bugs in batch processing - this now works from the command line.
 
+Version 2.4.3
+Correct ISBN13 check digit
+
+ISBN-13 check digit now correctly identifies '0'.
+Thanks to Kévin Sailly.
+
 CONTACT ME
 ----------
 The home of libzint is:
